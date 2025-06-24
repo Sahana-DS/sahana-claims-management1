@@ -1,0 +1,49 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: postgres-container3
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin234
+      POSTGRES_DB: employee_claims_db
+    ports:
+      - "5002:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    build:
+      context: ./Backend
+      dockerfile: Dockerfile
+    container_name: backend-service4
+    depends_on:
+      - postgres
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgres://postgres:admin234@postgres:5432/employee_claims_db
+
+  employee_side_claim:
+    build:
+      context: ./employee-side-claim
+      dockerfile: Dockerfile
+    container_name: employee-side-claim-service
+    ports:
+      - "5033:80"
+    depends_on:
+      - backend
+
+  hr_claim:
+    build:
+      context: ./hr-claim
+      dockerfile: Dockerfile
+    container_name: hr-claim-service
+    ports:
+      - "5034:80"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
